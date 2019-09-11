@@ -17,7 +17,7 @@ const httpLog = debug_1.debug('http');
  * Creates and returns a resolver function that performs API requests for the
  * given GraphQL query
  */
-function getResolver({ operation, argsFromLink = {}, payloadName, data, baseUrl, requestOptions }) {
+function getResolver({ operation, argsFromLink = {}, payloadName, data, baseUrl, many_to_many = false, requestOptions }) {
     // Determine the appropriate URL:
     if (typeof baseUrl === 'undefined') {
         baseUrl = Oas3Tools.getBaseUrl(operation);
@@ -110,6 +110,23 @@ function getResolver({ operation, argsFromLink = {}, payloadName, data, baseUrl,
                 });
                 args[paramNameWithoutLocation] = value;
             }
+        }
+        // Here is where we want to be
+        if (many_to_many) {
+            const promises = args['id'].map(uid => getResolver({
+                operation,
+                argsFromLink: { id: uid.toString() },
+                payloadName,
+                data,
+                baseUrl,
+                many_to_many: false,
+                requestOptions
+            })(root, args, ctx, info));
+            return new Promise((resolve, reject) => {
+                Promise.all(promises).then((results) => {
+                    resolve(results);
+                });
+            });
         }
         // Stored used parameters to future requests:
         resolveData.usedParams = Object.assign(resolveData.usedParams, args);

@@ -10,11 +10,12 @@ declare type GetResolverParams = {
     payloadName?: string;
     data: PreprocessingData;
     baseUrl?: string;
+    many_to_many?: boolean;
     requestOptions?: NodeRequest.OptionsWithUrl;
 };
 /**
  * Creates and returns a resolver function that performs API requests for the
  * given GraphQL query
  */
-export declare function getResolver({ operation, argsFromLink, payloadName, data, baseUrl, requestOptions }: GetResolverParams): ResolveFunction;
+export declare function getResolver({ operation, argsFromLink, payloadName, data, baseUrl, many_to_many, requestOptions }: GetResolverParams): ResolveFunction;
 export {};

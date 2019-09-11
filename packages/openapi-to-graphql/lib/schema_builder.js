@@ -365,7 +365,8 @@ function createFields({ def, links, operation, data, iteration, isInputObjectTyp
                         operation: linkedOp,
                         argsFromLink: Oas3Tools.sanitizeObjectKeys(argsFromLink),
                         data,
-                        baseUrl: data.options.baseUrl
+                        baseUrl: data.options.baseUrl,
+                        many_to_many: !!link['x-many-to-many']
                     });
                     // Get args for link
                     const args = getArgs({
@@ -378,7 +379,19 @@ function createFields({ def, links, operation, data, iteration, isInputObjectTyp
                      * Use the reference here
                      * OT will be built up some other time
                      */
-                    const resObjectType = linkedOp.responseDefinition.ot;
+                    let resObjectType;
+                    if (link['x-many-to-many']) {
+                        // Make it an array type of whatever it is atomically
+                        let linkedType = getGraphQLType({
+                            def: linkedOp.responseDefinition,
+                            operation: linkedOp,
+                            data
+                        });
+                        resObjectType = new graphql_1.GraphQLList(linkedType);
+                    }
+                    else {
+                        resObjectType = linkedOp.responseDefinition.ot;
+                    }
                     let description = link.description;
                     if (data.options.equivalentToMessages && description) {
                         description += `\n\nEquivalent to ${linkedOp.operationString}`;
