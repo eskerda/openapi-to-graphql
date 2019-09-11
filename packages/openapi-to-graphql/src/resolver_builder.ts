@@ -42,6 +42,7 @@ type GetResolverParams = {
   payloadName?: string
   data: PreprocessingData
   baseUrl?: string
+  many_to_many?: boolean
   requestOptions?: NodeRequest.OptionsWithUrl
 }
 
@@ -55,6 +56,7 @@ export function getResolver({
   payloadName,
   data,
   baseUrl,
+  many_to_many = false,
   requestOptions
 }: GetResolverParams): ResolveFunction {
   // Determine the appropriate URL:
@@ -177,6 +179,27 @@ export function getResolver({
         })
         args[paramNameWithoutLocation] = value
       }
+    }
+
+    // Here is where we want to be
+    if (many_to_many) {
+      const promises = args['id'].map(uid =>
+        getResolver({
+          operation,
+          argsFromLink: { id: uid.toString() },
+          payloadName,
+          data,
+          baseUrl,
+          many_to_many: false,
+          requestOptions
+        })(root, args, ctx, info)
+      )
+
+      return new Promise((resolve, reject) => {
+        Promise.all(promises).then((results: any[]) => {
+          resolve(results)
+        })
+      })
     }
 
     // Stored used parameters to future requests:

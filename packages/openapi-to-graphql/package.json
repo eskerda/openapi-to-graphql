@@ -47,6 +47,9 @@
     "guru-test": "DEBUG=preprocessing,translation node test/evaluation/eval_apis_guru.js",
     "test": "npm run build && jest"
   },
+  "bin": {
+    "openapi-to-graphql": "./lib/cli.js"
+  },
   "husky": {
     "hooks": {
       "pre-commit": "pretty-quick --staged"
@@ -65,6 +68,7 @@
   },
   "dependencies": {
     "@types/request": "^2.48.1",
+    "apollo-server": "^2.9.3",
     "debug": "^4.1.0",
     "deep-equal": "^1.0.1",
     "graphql-type-json": "^0.2.1",

@@ -545,7 +545,8 @@ function createFields({
               [key: string]: string
             },
             data,
-            baseUrl: data.options.baseUrl
+            baseUrl: data.options.baseUrl,
+            many_to_many: !!link['x-many-to-many']
           })
 
           // Get args for link
@@ -560,7 +561,20 @@ function createFields({
            * Use the reference here
            * OT will be built up some other time
            */
-          const resObjectType = linkedOp.responseDefinition.ot
+
+          let resObjectType
+
+          if (link['x-many-to-many']) {
+            // Make it an array type of whatever it is atomically
+            let linkedType = getGraphQLType({
+              def: linkedOp.responseDefinition,
+              operation: linkedOp,
+              data
+            })
+            resObjectType = new GraphQLList(linkedType)
+          } else {
+            resObjectType = linkedOp.responseDefinition.ot
+          }
 
           let description = link.description
  
@@ -590,6 +604,7 @@ function createFields({
   }
 
   fields = sortObject(fields)
+
   return fields
 }
 
